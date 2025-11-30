@@ -88,7 +88,7 @@ public class Item {
     // This for print out the detail
     @Override
     public String toString() {
-        String output = this.title + "\n" + this.author + "\n" + this.publicationDate + "\n" + this.quantity;
+        String output = this.title +"itemID: "+this.itemId + "\n" + this.author + "\n" + this.publicationDate + "\n" + this.quantity;
         return output;
     }
     private String makeItemId(String title){

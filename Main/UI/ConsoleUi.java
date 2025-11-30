@@ -5,6 +5,7 @@ import java.util.*;
 import javax.swing.tree.ExpandVetoException;
 
 import Library_Enhance.Main.Models.Item;
+import Library_Enhance.Main.Models.Student;
 import Library_Enhance.Main.Services.BorrowService;
 import Library_Enhance.Main.Services.LibraryServices;
 import Library_Enhance.Main.Services.StudentServices;
@@ -32,14 +33,17 @@ public class ConsoleUi  {
                 case 2:
                     clearScreen();
                     handleDeleteItem(scanner);
+                    clearScreen();
                     break;
                 case 3:
                     clearScreen();
                     handleAddItem();
+                    clearScreen();
                     break;
                 case 4:
                     clearScreen();
                     handleStudentMenu();
+                    clearScreen();
                     break;
                 case 5:
                     clearScreen();
@@ -61,7 +65,7 @@ public class ConsoleUi  {
         System.out.println("3  Add Item                        ");
         System.out.println("4  Student Services                ");
         System.out.println("5  Exit                            ");
-        System.out.print("➤ Choose option (1-5): ");
+        System.out.print("->Choose option (1-5): ");
     }
 
     private void handleAddItem() {
@@ -120,19 +124,23 @@ public class ConsoleUi  {
             System.out.println("Error");
         } else {
             System.out.println("Items terms: ");
-            String inputSearchTerm = handleInputString(scanner);
-            ArrayList<Item> itemsFound = this.libraryServices.searchItems(inputSearchTerm);
-
-            if (itemsFound.isEmpty()) {
-                System.out.println("There is no any items match your search!");
-            } else {
-                System.out.println("Found " + itemsFound.size() + " items!");
-                int number = 0;
-                for(Item item : itemsFound) {
+            try {
+                String inputSearchTerm = handleInputString(scanner);
+                ArrayList<Item> itemsFound = this.libraryServices.searchItems(inputSearchTerm);
+    
+                if (itemsFound.isEmpty()) {
+                    System.out.println("There is no any items match your search!");
+                } else {
+                    System.out.println("Found " + itemsFound.size() + " items!");
+                    int number = 0;
+                    for(Item item : itemsFound) {
+                        System.out.println("-----------------");
+                        System.out.println(number + 1 + ". " + item.toString());
+                    }
                     System.out.println("-----------------");
-                    System.out.println(number + 1 + ". " + item.toString());
                 }
-                System.out.println("-----------------");
+            } catch (Exception e) {
+                System.out.println(e.getMessage());
             }
         }
     }
@@ -175,32 +183,49 @@ public class ConsoleUi  {
         if (this.libraryServices.isEmpty()) {
             System.out.println("Error");
         } else {
-            handleSearch(scanner);
-            System.out.println("Enter ItemID to delete");
-            String itemId = handleInputString(scanner);
-            System.out.println("Are you sure to remove this item?");
-            this.libraryServices.getItem(itemId);
-            this.libraryServices.deleteItemsByItemsId(itemId);
+            try {
+                handleSearch(scanner);
+                System.out.println("Enter ItemID to delete");
+                String itemId = handleInputString(scanner);
+                System.out.println("Are you sure to remove this item?");
+                this.libraryServices.getItem(itemId);
+                System.out.println("1. Yes");
+                System.out.println("2. No");
+                String answer = scanner.next();
+                if(answer.equalsIgnoreCase("yes") || answer.equalsIgnoreCase("1")){
+                    scanner.nextLine();
+                    this.libraryServices.deleteItemsByItemsId(itemId);
+                    System.out.println("Removed");
+                    return;
+                }
+                scanner.nextLine();
+            } catch (Exception e) {
+                System.out.println(e.getMessage());
+            }
         }
     }
 
     // ===== STUDENT MENU =====
     private void handleStudentMenu() {
-        System.out.println("\n👥 STUDENT SERVICES\n");
-        System.out.println("1️⃣  Borrow Item");
-        System.out.println("2️⃣  Return Item");
-        System.out.print("➤ Choose (1-2): ");
+        try{
+            System.out.println("\n STUDENT SERVICES\n");
+            System.out.println("1. Borrow Item");
+            System.out.println("2. Return Item");
+            System.out.print("->Choose (1-2): ");
 
-        int choice = getMenuChoice();
-        switch (choice) {
-            case 1:
-                handleBorrow();
+            int choice = getMenuChoice();
+            switch (choice) {
+                case 1:
+                    handleBorrow();
+                    break;
+                case 2:
+                        handleReturn();
                 break;
-            case 2:
-                handleReturn();
-                break;
-            default:
-                printError("Invalid choice!");
+                default:
+                    printError("Invalid choice!");
+            }
+        }
+        catch(Exception e){
         }
     }
 
@@ -210,5 +235,39 @@ public class ConsoleUi  {
         } catch (NumberFormatException e) {
             return -1;
         }
+    }
+    private void handleBorrow() throws Exception {
+        if(!this.libraryServices.isEmpty()){
+            handleSearch(scanner);
+            System.out.println("Item ID: ");
+            String itemId = handleInputString(scanner);
+            Item item = this.libraryServices.searchItemsById(itemId);
+            
+            
+            System.out.println("UID: ");
+                    String uid = handleInputString(scanner);
+                    if(!this.studentServices.isUidExist(uid)){
+                        System.out.println("Name: ");
+                        String name = handleInputString(scanner);
+                        System.out.println("Mail: ");                String mail = scanner.nextLine();
+                System.out.println("Phone number: ");
+                String phone = scanner.nextLine();
+                Student student = new Student(name, uid, mail, phone);
+                this.studentServices.registerStudent(student);
+            }
+
+            System.out.println("Today: ");
+            String today = handleInputString(scanner);
+            String returnId = this.borrowService.borrowItem(uid, item, today);
+            System.out.println("Your return ID: " + returnId);
+        }
+             
+    }
+
+    private void handleReturn() {
+    }
+
+    private void printError(String message) {
+        System.out.println("Error: " + message);
     }
 }
