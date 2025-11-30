@@ -14,13 +14,12 @@ public class BorrowService {
         this.studentServices = studentServices;
 
     }
-
     // BORROW ITEM
-    public boolean borrowItem(String uid, Item item, String date) {
+    public String borrowItem(String uid, Item item, String date) {
         // Check for the ID of student and the item have enough quanity
         // Logic: can have the same itemID product for many pp but with unique returnId
         // When student borrow: diffrent returnId
-        if (studentServices.isUidExist(uid) == false && item.isAvailable()) {
+        if (studentServices.isUidExist(uid) && item.isAvailable()) {
             String name = this.studentServices.findStudent(uid).getName();
             String title = item.getTitle();
             String itemId = item.getItemId();
@@ -31,9 +30,9 @@ public class BorrowService {
 
             item.decreaseQuanity();
 
-            return true;
+            return returnId;
         }
-        return false;
+        return null;
     }
 
     // make an ID for the returning while borrowing
@@ -70,6 +69,8 @@ public class BorrowService {
         }
         return false;
     }
+
+
 
     // See the history of borrowing and returning
     // Logic find all borrowing and returning of a student by uid and make sure that
